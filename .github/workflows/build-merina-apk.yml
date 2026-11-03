@@ -1,5 +1,8 @@
 name: Build Merina APK
 
+permissions:
+  contents: write
+
 on:
   push:
     branches: [merina-apk]
@@ -26,3 +29,10 @@ jobs:
         with:
           name: Merina-apk
           path: merina-android/app/build/outputs/apk/debug/app-debug.apk
+      - name: Save APK on branch apk-output
+        working-directory: ${{ github.workspace }}
+        run: |
+          mkdir /tmp/out && cp merina-android/app/build/outputs/apk/debug/app-debug.apk /tmp/out/Merina.apk
+          git config user.name "github-actions" && git config user.email "actions@github.com"
+          git checkout --orphan apk-output && git rm -rfq . && cp /tmp/out/Merina.apk . && git add Merina.apk
+          git commit -qm "Merina APK" && git push -f origin apk-output
